@@ -3,23 +3,33 @@
 # https://docs.tilt.dev/api.html#api.version_settings
 version_settings(constraint='>=0.22.2')
 
+allow_k8s_contexts('do-sfo3-tiny-tunnel-kube1')
+
 # tilt-avatar-api is the backend (Python/Flask app)
 # live_update syncs changed source code files to the correct place for the Flask dev server
 # and runs pip (python package manager) to update dependencies when changed
 # https://docs.tilt.dev/api.html#api.docker_build
 # https://docs.tilt.dev/live_update_reference.html
-docker_build(
-    'tilt-avatar-api',
-    context='.',
-    dockerfile='./deploy/api.dockerfile',
-    only=['./api/'],
-    live_update=[
-        sync('./api/', '/app/api/'),
-        run(
-            'pip install -r /app/requirements.txt',
-            trigger=['./api/requirements.txt']
-        )
-    ]
+# docker_build(
+#     'tilt-avatar-api',
+#     context='.',
+#     dockerfile='./deploy/api.dockerfile',
+#     only=['./api/'],
+#     live_update=[
+#         sync('./api/', '/app/api/'),
+#         run(
+#             'pip install -r /app/requirements.txt',
+#             trigger=['./api/requirements.txt']
+#         )
+#     ]
+# )
+
+custom_build(
+  'registry.digitalocean.com/tiny-tunnel-registry/tilt-avatars-api',
+  'docker buildx build --platform=linux/amd64 -t $EXPECTED_REF --push -f deploy/api.dockerfile .',
+  deps=['api'],
+  skips_local_docker=True,
+  disable_push=True,
 )
 
 # k8s_yaml automatically creates resources in Tilt for the entities
@@ -43,20 +53,28 @@ k8s_resource(
 # changed dynamically at runtime
 # https://docs.tilt.dev/api.html#api.docker_build
 # https://docs.tilt.dev/live_update_reference.html
-docker_build(
-    'tilt-avatar-web',
-    context='.',
-    dockerfile='./deploy/web.dockerfile',
-    only=['./web/'],
-    ignore=['./web/dist/'],
-    live_update=[
-        fall_back_on('./web/vite.config.js'),
-        sync('./web/', '/app/'),
-        run(
-            'yarn install',
-            trigger=['./web/package.json', './web/yarn.lock']
-        )
-    ]
+# docker_build(
+#     'tilt-avatar-web',
+#     context='.',
+#     dockerfile='./deploy/web.dockerfile',
+#     only=['./web/'],
+#     ignore=['./web/dist/'],
+#     live_update=[
+#         fall_back_on('./web/vite.config.js'),
+#         sync('./web/', '/app/'),
+#         run(
+#             'yarn install',
+#             trigger=['./web/package.json', './web/yarn.lock']
+#         )
+#     ]
+# )
+
+custom_build(
+  'registry.digitalocean.com/tiny-tunnel-registry/tilt-avatars-web',
+  'docker buildx build --platform=linux/amd64 -t $EXPECTED_REF --push -f deploy/web.dockerfile .',
+  deps=['web'],
+  skips_local_docker=True,
+  disable_push=True,
 )
 
 # k8s_yaml automatically creates resources in Tilt for the entities

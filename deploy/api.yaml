@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: tilt-avatar-api
-          image: tilt-avatar-api
+          image: registry.digitalocean.com/tiny-tunnel-registry/tilt-avatars-api
           ports:
             - containerPort: 5000
           readinessProbe:

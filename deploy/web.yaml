@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: tilt-avatar-web
-          image: tilt-avatar-web
+          image: registry.digitalocean.com/tiny-tunnel-registry/tilt-avatars-web
           env:
             - name: VITE_CLIENT_PORT
               value: '5735'
